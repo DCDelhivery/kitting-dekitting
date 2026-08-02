@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combo Kitting - WMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-coal-weakest: #f9f9fb;
+      --bg-coal-weaker: #eff1f5;
+      --bg-strongest: #f7f7f7;
+      --border-primary: #e6e6e6;
+      --border-secondary: #d9d9d9;
+      --border-coal: #eff1f5;
+      --text-primary: #2b2b2b;
+      --text-secondary: #3b3b3b;
+      --text-heading: #121212;
+      --text-base: #737373;
+      --text-disabled: #cdcbcb;
+      --text-caption: #454545;
+      --surface-inverse: #000000;
+      --radius-default: 6px;
+      --radius-medium: 8px;
+      --radius-max: 999px;
+      --success: #0d7a3f;
+      --success-bg: #e6f5ed;
+      --warning: #d97706;
+      --warning-bg: #fef3e2;
+      --info: #0066cc;
+      --info-bg: #e6f0fa;
+      --error: #dc2626;
+      --primary: #E31E24;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans', sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+
+
+    /* Top Navigation */
+    .top-nav { height: 76px; background: var(--bg-strongest); border-bottom: 1px solid var(--border-primary); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
+    .nav-brand { display: flex; align-items: center; gap: 16px; }
+    .nav-brand-icon { width: 28px; height: 28px; background: black; display: flex; align-items: center; justify-content: center; border-radius: 2px; }
+    .nav-brand-icon svg { width: 20px; height: 20px; fill: white; }
+    .nav-brand-text h1 { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 700; text-transform: uppercase; line-height: 28px; }
+    .nav-brand-text small { font-size: 12px; color: #111; letter-spacing: 0.3px; line-height: 18px; }
+    .nav-spacer { flex: 1; }
+
+    .nav-search { display: flex; align-items: center; width: 324px; }
+    .nav-search-dropdown { background: var(--bg-coal-weaker); border: 1px solid var(--border-primary); border-radius: 4px 0 0 4px; padding: 8px 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .nav-search-input { flex: 1; border: 1px solid var(--border-primary); border-left: none; border-radius: 0 4px 4px 0; padding: 8px 12px; font-size: 14px; color: var(--text-base); display: flex; align-items: center; gap: 4px; }
+    .nav-profile { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-inverse); border: 0.5px solid var(--border-primary); display: flex; align-items: center; justify-content: center; color: var(--border-primary); font-size: 14px; font-weight: 600; }
+    .profile-text { display: flex; flex-direction: column; gap: 4px; }
+    .profile-text .name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+    .profile-text .role { font-size: 10px; color: var(--text-caption); }
+
+    /* Main Layout */
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    /* Side Navigation */
+    .side-nav { width: 240px; background: var(--bg-primary); border-right: 1px solid var(--border-primary); display: flex; flex-direction: column; gap: 8px; padding: 8px; overflow-y: auto; flex-shrink: 0; }
+    .nav-cell { display: flex; align-items: center; gap: 4px; padding: 8px 12px; border-radius: var(--radius-medium); cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-primary); transition: background .15s; }
+    .nav-cell:hover { background: var(--bg-coal-weakest); }
+    .nav-cell.active { background: var(--bg-coal-weaker); }
+    .nav-cell .icon { font-size: 20px; color: var(--text-base); margin-right: 4px; }
+    .nav-cell .arrow { margin-left: auto; font-size: 20px; color: var(--text-base); transition: transform .2s; }
+    .nav-cell .arrow.up { transform: rotate(180deg); }
+    .nav-group { border: 0.5px solid var(--border-secondary); border-radius: 4px; display: flex; flex-direction: column; gap: 4px; }
+    .nav-group-header { display: flex; align-items: center; gap: 4px; padding: 8px 12px; border-radius: var(--radius-medium); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .nav-group-list { display: flex; flex-direction: column; gap: 2px; padding: 0 4px 4px; }
+
+    /* Content Area */
+    .content { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 16px; overflow: hidden; background: white; }
+    .table-header { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: var(--radius-medium) var(--radius-medium) 0 0; }
+    .table-header h2 { font-size: 20px; font-weight: 600; color: var(--text-heading); line-height: 26px; }
+    .input-row { display: flex; gap: 16px; flex-shrink: 0; }
+    .input-field { width: 393px; display: flex; flex-direction: column; gap: 8px; }
+    .input-field label { font-size: 14px; font-weight: 500; color: var(--text-secondary); line-height: 20px; }
+    .input-field label.disabled { color: var(--text-disabled); }
+    .input-field .input-box { display: flex; align-items: center; gap: 4px; padding: 12px; border: 1px solid var(--border-primary); border-radius: var(--radius-default); background: var(--bg-primary); overflow: hidden; }
+    .input-field .input-box.disabled { border-color: var(--border-secondary); }
+    .input-field .input-box .material-icons-outlined { font-size: 20px; color: var(--text-base); }
+    .input-field .input-box.disabled .material-icons-outlined { color: var(--text-disabled); }
+    .input-field .input-box input { border: none; outline: none; font-size: 14px; font-weight: 500; font-family: inherit; flex: 1; color: var(--text-primary); background: transparent; }
+    .input-field .input-box input::placeholder { color: var(--text-base); }
+    .input-field .input-box.disabled input::placeholder { color: var(--text-disabled); }
+
+    /* Panels */
+    .panels-container { display: flex; flex: 1; overflow: hidden; }
+    .panel-left { width: 393px; min-width: 393px; background: var(--bg-coal-weakest); display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+    .panel-right { flex: 1; border: 1px solid var(--border-coal); background: var(--bg-primary); display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+    .panel-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; height: 100%; padding: 40px; }
+    .panel-empty img { width: 100px; height: auto; opacity: 0.6; }
+    .panel-empty p { font-size: 14px; font-weight: 500; color: var(--text-base); text-align: center; }
+
+    /* Info Card */
+    .info-card { background: var(--bg-primary); border: 1px solid var(--border-primary); border-radius: var(--radius-medium); padding: 12px; margin: 16px; }
+    .info-card .value { font-size: 16px; font-weight: 600; color: var(--text-heading); }
+    .info-card .label { font-size: 12px; color: var(--text-base); margin-top: 4px; }
+
+    /* Accordion */
+    .accordion { margin: 0 16px 8px; border: 1px solid var(--border-primary); border-radius: var(--radius-medium); overflow: hidden; }
+    .acc-header { display: flex; align-items: center; gap: 8px; padding: 12px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-primary); background: var(--bg-primary); }
+    .acc-header .arrow { margin-left: auto; font-size: 18px; color: var(--text-base); transition: transform .2s; }
+    .acc-header.open .arrow { transform: rotate(180deg); }
+    .acc-body { padding: 8px 12px; border-top: 1px solid var(--border-primary); background: var(--bg-coal-weakest); }
+    .acc-body.hidden { display: none; }
+    .sku-item { display: flex; align-items: flex-start; gap: 8px; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-primary); border-radius: 4px; margin-bottom: 4px; }
+    .sku-item .sku-info { flex: 1; }
+    .sku-item .sku-name { font-size: 14px; font-weight: 500; }
+    .sku-item .sku-meta { font-size: 11px; color: var(--text-base); margin-top: 2px; }
+    .sku-item .sku-qty { font-size: 14px; font-weight: 500; color: var(--text-base); }
+    .total-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .total-row span { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+
+    /* Badge */
+    .badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-info { background: var(--info-bg); color: var(--info); }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-warning { background: var(--warning-bg); color: var(--warning); }
+
+    /* Progress Bar */
+    .progress-section { margin: 0 16px; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-primary); border-radius: var(--radius-medium); }
+    .progress-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+    .progress-label .lbl { color: var(--text-base); }
+    .progress-label .val { font-weight: 600; color: var(--text-primary); }
+    .progress-track { height: 4px; background: var(--border-primary); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--success); border-radius: 99px; transition: width .3s; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 8px 16px; border-radius: var(--radius-default); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; transition: all .15s; }
+    .btn-primary { background: var(--text-heading); color: white; }
+    .btn-primary:hover { background: #000; }
+    .btn-primary:disabled { background: var(--border-primary); color: var(--text-disabled); cursor: not-allowed; }
+    .btn-outline { background: transparent; border: 1px solid var(--border-primary); color: var(--text-primary); }
+    .btn-outline:hover { background: var(--bg-coal-weakest); }
+    .btn-sm { padding: 4px 12px; font-size: 12px; }
+
+    /* Scan Log */
+    .scan-log-header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; margin-bottom: 8px; }
+    .scan-log-header .title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .product-details { margin: 0 16px; padding: 16px; background: var(--bg-primary); border: 1px solid var(--border-primary); border-radius: var(--radius-medium); }
+    .product-name { font-size: 16px; font-weight: 600; color: var(--text-heading); margin-bottom: 4px; }
+    .product-meta { font-size: 12px; color: var(--text-base); line-height: 1.6; }
+    .product-row { display: flex; align-items: center; gap: 16px; }
+    .product-row .qty-input { width: 218px; }
+
+    /* Destination */
+    .dest-section { margin: 16px; padding: 16px; border: 1px solid var(--border-primary); border-radius: var(--radius-medium); background: var(--bg-primary); }
+    .dest-section .input-box { margin-top: 8px; }
+
+    /* Snackbar */
+    .snackbar { display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 2000; align-items: center; gap: 8px; padding: 10px 20px; background: var(--success-bg); border: 1px solid var(--success); border-radius: var(--radius-default); font-size: 13px; font-weight: 500; color: var(--success); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .snackbar.vis { display: flex; }
+    .snackbar .material-icons-outlined { font-size: 16px; }
+
+    /* Loader */
+    .loader-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
+    .loader { width: 48px; height: 48px; border: 3px solid var(--border-primary); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { font-size: 14px; color: var(--text-base); }
+
+    /* Popup / Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.vis { display: flex; }
+    .modal { background: white; border-radius: var(--radius-medium); width: 632px; max-height: 80vh; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border-primary); font-size: 16px; font-weight: 600; }
+    .modal-body { padding: 24px; overflow-y: auto; max-height: 60vh; }
+    .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--border-primary); }
+
+    /* Review table */
+    .review-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .review-table th { text-align: left; padding: 8px 12px; background: var(--bg-coal-weakest); font-weight: 600; color: var(--text-heading); border-bottom: 1px solid var(--border-primary); }
+    .review-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-primary); color: var(--text-primary); }
+
+    /* Flow tabs */
+    .flow-tabs { display: flex; gap: 4px; flex-shrink: 0; padding: 4px; background: var(--bg-coal-weakest); border-radius: var(--radius-medium); border: 1px solid var(--border-primary); align-items: center; flex-wrap: wrap; }
+    .flow-tabs .sep { width: 1px; height: 24px; background: var(--border-primary); margin: 0 6px; }
+    .flow-tabs .group-label { font-size: 10px; font-weight: 600; color: var(--text-base); text-transform: uppercase; letter-spacing: 0.4px; padding: 0 8px; }
+    .flow-tabs button { padding: 6px 14px; border-radius: var(--radius-default); border: none; cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit; background: transparent; color: var(--text-base); transition: all .15s; }
+    .flow-tabs button:hover { background: var(--bg-coal-weaker); }
+    .flow-tabs button.active { background: var(--text-heading); color: white; }
+
+    /* Flow panels */
+    .flow-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    .flow-panel.active { display: flex; }
+
+    /* Completed state */
+    .completed-banner { display: flex; align-items: center; gap: 12px; padding: 16px; margin: 16px; background: var(--success-bg); border: 1px solid #a7d7b8; border-radius: var(--radius-medium); }
+    .completed-banner .material-icons-outlined { font-size: 24px; color: var(--success); }
+    .completed-banner .text h3 { font-size: 15px; font-weight: 600; color: var(--success); }
+    .completed-banner .text p { font-size: 12px; color: var(--text-base); margin-top: 2px; }
+
+    /* Check circle */
+    .check-done { color: var(--success); font-size: 24px; }
+
+    /* Animations */
+    .fade-in { animation: fadeIn .25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Associated pills */
+    .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .pill { padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 500; border: 1px solid var(--border-primary); background: var(--bg-primary); color: var(--text-primary); }
+    .pill.scanned { background: var(--success-bg); color: var(--success); border-color: #a7d7b8; }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border-primary); margin: 8px 0; }
+  </style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="top-nav">
+  <div class="nav-brand">
+    <span class="material-icons-outlined" style="font-size:24px;color:var(--text-base);cursor:pointer;">menu</span>
+    <div class="nav-brand-icon"><svg viewBox="0 0 28 28"><path d="M4 8h20v2H4zm0 5h20v2H4zm0 5h12v2H4z"/></svg></div>
+    <div class="nav-brand-text"><h1>WMS</h1><small>Warehouse Management System</small></div>
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="nav-search">
+    <div class="nav-search-dropdown">AWB <span class="material-icons-outlined" style="font-size:18px;">keyboard_arrow_down</span></div>
+    <div class="nav-search-input"><span class="material-icons-outlined" style="font-size:18px;">search</span> Search</div>
+  </div>
+  <div class="nav-profile">
+    <div class="avatar">DD</div>
+    <div class="profile-text"><span class="name">Jhonathan Smith</span><span class="role">Admin</span></div>
+    <span class="material-icons-outlined" style="font-size:20px;color:var(--text-base);">keyboard_arrow_down</span>
+  </div>
+</nav>
+
+<div class="main">
+  <!-- Side Navigation -->
+  <aside class="side-nav">
+    <div class="nav-cell">Select FC</div>
+    <div class="nav-cell">Inbound <span class="arrow material-icons-outlined">keyboard_arrow_down</span></div>
+    <div class="nav-group">
+      <div class="nav-group-header nav-cell">Outbound <span class="arrow up material-icons-outlined">keyboard_arrow_down</span></div>
+      <div style="padding:0 4px 4px;"><div style="height:1px;background:var(--border-secondary);margin-bottom:4px;"></div></div>
+      <div class="nav-group-list">
+        <div class="nav-cell">Shipment</div>
+        <div class="nav-cell">Pickwave</div>
+        <div class="nav-cell">Picklist</div>
+        <div class="nav-cell">Consolidate</div>
+        <div class="nav-cell active">Kitting / de-kitting</div>
+        <div class="nav-cell">Pack</div>
+        <div class="nav-cell">Dimension capture</div>
+        <div class="nav-cell">Sort packages</div>
+        <div class="nav-cell">Dispatch</div>
+        <div class="nav-cell">Order reallocate</div>
+      </div>
+    </div>
+    <div class="nav-cell">Inventory <span class="arrow material-icons-outlined">keyboard_arrow_down</span></div>
+    <div class="nav-cell">Transfers <span class="arrow material-icons-outlined">keyboard_arrow_down</span></div>
+    <div class="nav-cell"><span class="icon material-icons-outlined">help_outline</span>Cycle count <span class="arrow material-icons-outlined">keyboard_arrow_down</span></div>
+    <div class="nav-cell"><span class="icon material-icons-outlined">assignment_return</span>Returns</div>
+    <div class="nav-cell"><span class="icon material-icons-outlined">info</span>Exception handling</div>
+    <div class="nav-cell"><span class="icon material-icons-outlined">device_hub</span>Problem shipment</div>
+    <div class="nav-cell"><span class="icon material-icons-outlined">settings</span>Help desk</div>
+  </aside>
+
+  <!-- Content Area -->
+  <div class="content">
+    <!-- Table Header -->
+    <div class="table-header">
+      <h2>Kitting / De-kitting</h2>
+    </div>
+
+    <!-- Flow Tabs -->
+    <div class="flow-tabs">
+      <span class="group-label">Kitting</span>
+      <button class="active" onclick="switchFlow('k11',this)">1 Cont : 1 Combo</button>
+      <button onclick="switchFlow('k1m',this)">1 Cont : Many Combos</button>
+      <button onclick="switchFlow('km1',this)">Many Cont : 1 Combo</button>
+      <button onclick="switchFlow('kmm',this)">Many Cont : Many Combos</button>
+      <span class="sep"></span>
+      <span class="group-label">De-Kitting</span>
+      <button onclick="switchFlow('dk11',this)">1 Cont &rarr; 1 Combo</button>
+      <button onclick="switchFlow('dk1m',this)">1 Cont &rarr; Many Combos</button>
+    </div>
+
+    <!-- === Flow: 1 Container 1 Combo === -->
+    <div class="flow-panel active" id="k11">
+      <!-- Input Row -->
+      <div class="input-row" style="margin-bottom:8px;">
+        <div class="input-field">
+          <label>Scan container</label>
+          <div class="input-box" id="k11-container-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="k11-ci" placeholder="Ex: CONT_8819000200010" onkeydown="if(event.key==='Enter')k11ScanContainer()">
+          </div>
+        </div>
+        <div class="input-field">
+          <label class="disabled" id="k11-prod-label">Scan product</label>
+          <div class="input-box disabled" id="k11-product-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="k11-pi" placeholder="Ex: CONT_8819000200010" disabled onkeydown="if(event.key==='Enter')k11ScanProduct()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Panels -->
+      <div class="panels-container" style="flex:1;">
+        <!-- Left Panel -->
+        <div class="panel-left" id="k11-left">
+          <div class="panel-empty" id="k11-left-empty">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="20" y="30" width="60" height="45" rx="4" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M35 50h30M35 60h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/><circle cx="65" cy="25" r="12" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M62 25l3 3 5-5" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p>Scanned containers will be visible here</p>
+          </div>
+          <div id="k11-left-content" style="display:none;">
+            <!-- Populated on scan -->
+          </div>
+        </div>
+        <!-- Right Panel -->
+        <div class="panel-right" id="k11-right">
+          <div class="panel-empty" id="k11-right-empty">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><rect x="15" y="20" width="50" height="40" rx="3" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M25 35h30M25 45h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/><circle cx="55" cy="55" r="10" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M52 55h6M55 52v6" stroke="#ccc" stroke-width="2" stroke-linecap="round"/></svg>
+            <p>Scanned products will be visible here</p>
+          </div>
+          <div id="k11-right-content" style="display:none;">
+            <!-- Populated on product scan -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Other Flow Panels (Placeholders) === -->
+    <div class="flow-panel" id="k1m">
+      <!-- Input Row -->
+      <div class="input-row" style="margin-bottom:8px;">
+        <div class="input-field">
+          <label>Scan container</label>
+          <div class="input-box" id="k1m-container-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="k1m-ci" placeholder="Ex: CONT_8819000200010" onkeydown="if(event.key==='Enter')k1mScanContainer()">
+          </div>
+        </div>
+        <div class="input-field">
+          <label class="disabled" id="k1m-prod-label">Scan product</label>
+          <div class="input-box disabled" id="k1m-product-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="k1m-pi" placeholder="Ex: CONT_8819000200010" disabled onkeydown="if(event.key==='Enter')k1mScanProduct()">
+          </div>
+        </div>
+      </div>
+      <div class="panels-container" style="flex:1;">
+        <div class="panel-left" id="k1m-left">
+          <div class="panel-empty" id="k1m-left-empty">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="20" y="30" width="60" height="45" rx="4" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M35 50h30M35 60h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/><circle cx="65" cy="25" r="12" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M62 25l3 3 5-5" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p>Scanned containers will be visible here</p>
+          </div>
+          <div id="k1m-left-content" style="display:none;"></div>
+        </div>
+        <div class="panel-right" id="k1m-right">
+          <div class="panel-empty" id="k1m-right-empty">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><rect x="15" y="20" width="50" height="40" rx="3" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M25 35h30M25 45h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/><circle cx="55" cy="55" r="10" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M52 55h6M55 52v6" stroke="#ccc" stroke-width="2" stroke-linecap="round"/></svg>
+            <p>Scanned products will be visible here</p>
+          </div>
+          <div id="k1m-right-content" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-panel" id="km1">
+      <!-- Input Row -->
+      <div class="input-row" style="margin-bottom:8px;">
+        <div class="input-field">
+          <label>Scan container</label>
+          <div class="input-box" id="km1-container-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="km1-ci" placeholder="Ex: CONT_8819000200010" onkeydown="if(event.key==='Enter')km1ScanContainer()">
+          </div>
+        </div>
+        <div class="input-field">
+          <label class="disabled" id="km1-prod-label">Scan product</label>
+          <div class="input-box disabled" id="km1-product-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="km1-pi" placeholder="Ex: SKU_7829920000288" disabled onkeydown="if(event.key==='Enter')km1ScanProduct()">
+          </div>
+        </div>
+      </div>
+      <div class="panels-container" style="flex:1;">
+        <div class="panel-left" id="km1-left">
+          <div class="panel-empty" id="km1-left-empty">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="20" y="30" width="60" height="45" rx="4" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M35 50h30M35 60h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/><circle cx="65" cy="25" r="12" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M62 25l3 3 5-5" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p>Scanned containers will be visible here</p>
+          </div>
+          <div id="km1-left-content" style="display:none;"></div>
+        </div>
+        <div class="panel-right" id="km1-right">
+          <div class="panel-empty" id="km1-right-empty">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><rect x="15" y="20" width="50" height="40" rx="3" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M25 35h30M25 45h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/><circle cx="55" cy="55" r="10" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M52 55h6M55 52v6" stroke="#ccc" stroke-width="2" stroke-linecap="round"/></svg>
+            <p>Scanned products will be visible here</p>
+          </div>
+          <div id="km1-right-content" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-panel" id="kmm">
+      <!-- Input Row -->
+      <div class="input-row" style="margin-bottom:8px;">
+        <div class="input-field">
+          <label>Scan container</label>
+          <div class="input-box" id="kmm-container-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="kmm-ci" placeholder="Ex: CONT_8819000200010" onkeydown="if(event.key==='Enter')kmmScanContainer()">
+          </div>
+        </div>
+        <div class="input-field">
+          <label class="disabled" id="kmm-prod-label">Scan product</label>
+          <div class="input-box disabled" id="kmm-product-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="kmm-pi" placeholder="Ex: SKU_7829920000288" disabled onkeydown="if(event.key==='Enter')kmmScanProduct()">
+          </div>
+        </div>
+      </div>
+      <div class="panels-container" style="flex:1;">
+        <div class="panel-left" id="kmm-left">
+          <div class="panel-empty" id="kmm-left-empty">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="20" y="30" width="60" height="45" rx="4" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M35 50h30M35 60h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/><circle cx="65" cy="25" r="12" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M62 25l3 3 5-5" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p>Scanned containers will be visible here</p>
+          </div>
+          <div id="kmm-left-content" style="display:none;"></div>
+        </div>
+        <div class="panel-right" id="kmm-right">
+          <div class="panel-empty" id="kmm-right-empty">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><rect x="15" y="20" width="50" height="40" rx="3" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M25 35h30M25 45h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/><circle cx="55" cy="55" r="10" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M52 55h6M55 52v6" stroke="#ccc" stroke-width="2" stroke-linecap="round"/></svg>
+            <p>Scanned products will be visible here</p>
+          </div>
+          <div id="kmm-right-content" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-panel" id="dk11">
+      <div class="input-row" style="margin-bottom:8px;">
+        <div class="input-field">
+          <label>Scan container</label>
+          <div class="input-box" id="dk11-container-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="dk11-ci" placeholder="Ex: CONT_8819000200010" onkeydown="if(event.key==='Enter')dk11ScanContainer()">
+          </div>
+        </div>
+        <div class="input-field">
+          <label class="disabled" id="dk11-prod-label">Scan product out</label>
+          <div class="input-box disabled" id="dk11-product-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="dk11-pi" placeholder="Scan product to de-kit" disabled onkeydown="if(event.key==='Enter')dk11ScanProduct()">
+          </div>
+        </div>
+      </div>
+      <div class="panels-container" style="flex:1;">
+        <div class="panel-left" id="dk11-left">
+          <div class="panel-empty" id="dk11-left-empty">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="20" y="30" width="60" height="45" rx="4" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M35 50h30M35 60h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/></svg>
+            <p>Scanned containers will be visible here</p>
+          </div>
+          <div id="dk11-left-content" style="display:none;"></div>
+        </div>
+        <div class="panel-right" id="dk11-right">
+          <div class="panel-empty" id="dk11-right-empty">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><rect x="15" y="20" width="50" height="40" rx="3" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M25 35h30M25 45h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/></svg>
+            <p>De-kitted products will be visible here</p>
+          </div>
+          <div id="dk11-right-content" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-panel" id="dk1m">
+      <div class="input-row" style="margin-bottom:8px;">
+        <div class="input-field">
+          <label>Scan container</label>
+          <div class="input-box" id="dk1m-container-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="dk1m-ci" placeholder="Ex: CONT_8819000200010" onkeydown="if(event.key==='Enter')dk1mScanContainer()">
+          </div>
+        </div>
+        <div class="input-field">
+          <label class="disabled" id="dk1m-prod-label">Scan product out</label>
+          <div class="input-box disabled" id="dk1m-product-box">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <input id="dk1m-pi" placeholder="Scan product to de-kit" disabled onkeydown="if(event.key==='Enter')dk1mScanProduct()">
+          </div>
+        </div>
+      </div>
+      <div class="panels-container" style="flex:1;">
+        <div class="panel-left" id="dk1m-left">
+          <div class="panel-empty" id="dk1m-left-empty">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="20" y="30" width="60" height="45" rx="4" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M35 50h30M35 60h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/></svg>
+            <p>Scanned containers will be visible here</p>
+          </div>
+          <div id="dk1m-left-content" style="display:none;"></div>
+        </div>
+        <div class="panel-right" id="dk1m-right">
+          <div class="panel-empty" id="dk1m-right-empty">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><rect x="15" y="20" width="50" height="40" rx="3" stroke="#ccc" stroke-width="2" fill="#f9f9fb"/><path d="M25 35h30M25 45h20" stroke="#ddd" stroke-width="2" stroke-linecap="round"/></svg>
+            <p>De-kitted products will be visible here</p>
+          </div>
+          <div id="dk1m-right-content" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<!-- Snackbar (fixed overlay) -->
+<div class="snackbar" id="k11-snackbar"><span class="material-icons-outlined">check_circle</span><span id="k11-snackbar-text">Kitting completed successfully</span></div>
+
+<!-- Modal for Review -->
+<div class="modal-overlay" id="k11-modal">
+  <div class="modal">
+    <div class="modal-header">Review Kitting Details <span class="material-icons-outlined" style="cursor:pointer;" onclick="document.getElementById('k11-modal').classList.remove('vis')">close</span></div>
+    <div class="modal-body">
+      <table class="review-table">
+        <thead><tr><th>Product</th><th>SKU</th><th>Qty</th><th>Dest.</th></tr></thead>
+        <tbody id="k11-review-body"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('k11-modal').classList.remove('vis')">Cancel</button>
+      <button class="btn btn-primary" onclick="k11Submit()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Flow tab switching
+function switchFlow(id, btn) {
+  document.querySelectorAll('.flow-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.flow-tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// === 1 Container 1 Combo Flow ===
+const k11Data = {
+  client: 'Mamaearth (Honasa Consumer Pvt Ltd)',
+  container: '',
+  totalUnits: 100,
+  scannedUnits: 0,
+  products: [
+    { name: 'ME Multani Mitti Face Wash 100ML', sku: '#2928442', scanId: '7829920000288837237', units: 264, scanned: 0 }
+  ],
+  scanLog: [],
+  destContainer: ''
+};
+
+function k11ScanContainer() {
+  const input = document.getElementById('k11-ci');
+  const val = input.value.trim() || 'CONT_8819000200010';
+  k11Data.container = val;
+  input.value = val;
+  document.getElementById('k11-container-box').style.borderColor = 'var(--success)';
+  document.getElementById('k11-container-box').style.background = '#fafff9';
+
+  // Show loading on left panel
+  document.getElementById('k11-left-empty').style.display = 'none';
+  const lc = document.getElementById('k11-left-content');
+  lc.style.display = 'block';
+  lc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching container details</div></div>';
+
+  setTimeout(() => { k11ShowContainerDetails(); }, 1200);
+}
+
+function k11ShowContainerDetails() {
+  const lc = document.getElementById('k11-left-content');
+  lc.innerHTML = `
+    <div class="fade-in">
+      <div style="padding:16px;font-size:14px;font-weight:600;color:var(--text-heading);">Container attributes</div>
+      <div class="info-card">
+        <div class="value">${k11Data.client}</div>
+        <div class="label">Client &bull; ${k11Data.container}</div>
+      </div>
+      <div class="accordion">
+        <div class="acc-header open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('hidden')">
+          Master SKU #1
+          <span class="badge badge-info" style="margin-left:8px;">1:1</span>
+          <span class="arrow material-icons-outlined">keyboard_arrow_down</span>
+        </div>
+        <div class="acc-body">
+          <div class="total-row"><span>Total units:</span><span class="badge badge-info">${k11Data.products[0].units}</span></div>
+          <div class="sku-item">
+            <div class="sku-info">
+              <div class="sku-name">${k11Data.products[0].name}</div>
+              <div class="sku-meta">SKU: ${k11Data.products[0].sku}<br>Scannable ID: ${k11Data.products[0].scanId}</div>
+            </div>
+            <div class="sku-qty">${k11Data.products[0].units} units</div>
+            <span class="badge badge-info" id="k11-sku-badge">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="progress-section" id="k11-progress">
+        <div class="progress-label"><span class="lbl">Scanned</span><span class="val" id="k11-prog-val">0 / ${k11Data.products[0].units}</span></div>
+        <div class="progress-track"><div class="progress-fill" id="k11-prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+  `;
+  // Enable product scan
+  document.getElementById('k11-prod-label').classList.remove('disabled');
+  document.getElementById('k11-product-box').classList.remove('disabled');
+  document.getElementById('k11-pi').disabled = false;
+  document.getElementById('k11-pi').focus();
+}
+
+function k11ScanProduct() {
+  const input = document.getElementById('k11-pi');
+  if (!input.value.trim()) return;
+  input.value = '';
+
+  // Show loading on right if first scan
+  if (k11Data.scannedUnits === 0) {
+    document.getElementById('k11-right-empty').style.display = 'none';
+    const rc = document.getElementById('k11-right-content');
+    rc.style.display = 'block';
+    rc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching product details</div></div>';
+    setTimeout(() => { k11AddProductScan(); }, 800);
+  } else {
+    k11AddProductScan();
+  }
+}
+
+function k11AddProductScan() {
+  k11Data.scannedUnits++;
+  k11Data.products[0].scanned++;
+  const p = k11Data.products[0];
+  const pct = Math.round((p.scanned / p.units) * 100);
+
+  // Update progress
+  document.getElementById('k11-prog-val').textContent = `${p.scanned} / ${p.units}`;
+  document.getElementById('k11-prog-fill').style.width = pct + '%';
+  document.getElementById('k11-sku-badge').textContent = p.scanned;
+
+  // Show right panel content
+  k11RenderRightPanel();
+  document.getElementById('k11-pi').focus();
+}
+
+function k11RenderRightPanel() {
+  const p = k11Data.products[0];
+  const rc = document.getElementById('k11-right-content');
+  rc.style.display = 'block';
+  const qtyConfirmed = k11Data.qtyConfirmed || false;
+  const printed = k11Data.printed || false;
+
+  rc.innerHTML = `
+    <div class="fade-in" style="padding:16px;">
+      <div class="scan-log-header">
+        <span class="title">Scan Log: ${p.sku}</span>
+        <button class="btn btn-outline btn-sm" id="k11-print-btn" ${!qtyConfirmed ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="k11PrintBarcode()">${printed ? 'Re-print barcode' : 'Print barcode'}</button>
+      </div>
+      <div class="product-details" style="margin:8px 0 16px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-meta">SKU: ${p.sku} <span class="material-icons-outlined" style="font-size:14px;vertical-align:middle;color:var(--info);cursor:pointer;">launch</span><br>Scannable ID: ${p.scanId}</div>
+          </div>
+          <div class="input-field" style="width:218px;">
+            <div class="input-box">
+              <input value="${p.scanned}" style="text-align:center;font-weight:600;" id="k11-qty-input" ${qtyConfirmed ? 'disabled style="text-align:center;font-weight:600;background:#f9f9fb;"' : ''} onkeydown="if(event.key==='Enter')k11ConfirmQty()">
+              ${qtyConfirmed ? '<span class="material-icons-outlined" style="font-size:16px;cursor:pointer;color:var(--text-base);" onclick="k11ResetQty()">close</span>' : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+      ${printed ? `
+      <div class="divider"></div>
+      <div style="margin-top:16px;" id="k11-dest-section">
+        <label style="font-size:14px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:8px;">Destination container</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border-primary);border-radius:var(--radius-default);background:var(--bg-primary);">
+            <span class="material-icons-outlined" style="font-size:18px;color:var(--text-base);">qr_code_scanner</span>
+            <input id="k11-dest" placeholder="Scan destination container" style="border:none;outline:none;flex:1;font-size:14px;font-family:inherit;font-weight:500;background:transparent;" oninput="k11ToggleConfirmBtn()" onkeydown="if(event.key==='Enter')k11ScanDest()">
+          </div>
+          <button class="btn btn-primary" id="k11-confirm-btn" disabled onclick="k11ScanDest()">Confirm</button>
+        </div>
+        <div id="k11-dest-status" style="margin-top:8px;display:none;"></div>
+      </div>` : ''}
+    </div>
+  `;
+}
+
+function k11ConfirmQty() {
+  const inp = document.getElementById('k11-qty-input');
+  const val = parseInt(inp.value) || 0;
+  if (val <= 0) return;
+  k11Data.products[0].scanned = val;
+  k11Data.scannedUnits = val;
+  k11Data.qtyConfirmed = true;
+  const p = k11Data.products[0];
+  const pct = Math.round((p.scanned / p.units) * 100);
+  document.getElementById('k11-prog-val').textContent = `${p.scanned} / ${p.units}`;
+  document.getElementById('k11-prog-fill').style.width = Math.min(pct, 100) + '%';
+  document.getElementById('k11-sku-badge').textContent = p.scanned;
+  k11RenderRightPanel();
+}
+
+function k11ResetQty() {
+  k11Data.qtyConfirmed = false;
+  k11RenderRightPanel();
+  setTimeout(() => { const inp = document.getElementById('k11-qty-input'); if(inp) inp.focus(); }, 100);
+}
+
+function k11PrintBarcode() {
+  k11Data.printed = true;
+  k11RenderRightPanel();
+}
+
+function k11ToggleConfirmBtn() {
+  const input = document.getElementById('k11-dest');
+  const btn = document.getElementById('k11-confirm-btn');
+  if (input && btn) {
+    btn.disabled = !input.value.trim();
+  }
+}
+
+function k11ScanDest() {
+  const input = document.getElementById('k11-dest');
+  const val = input.value.trim() || 'GGNFC20.PUTAWAY';
+  input.value = val;
+  k11Data.destContainer = val;
+  const status = document.getElementById('k11-dest-status');
+  status.style.display = 'block';
+  status.innerHTML = `<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--success-bg);border:1px solid #a7d7b8;border-radius:var(--radius-default);font-size:13px;color:var(--success);width:100%;"><span class="material-icons-outlined" style="font-size:16px;">check_circle</span><b>${val}</b>&nbsp;verified</div>
+  <div style="margin-top:12px;display:flex;gap:8px;" class="fade-in"><button class="btn btn-primary" onclick="k11Review()"><span class="material-icons-outlined" style="font-size:16px;">visibility</span>Review & Submit</button></div>`;
+}
+
+function k11Review() {
+  const p = k11Data.products[0];
+  const tbody = document.getElementById('k11-review-body');
+  tbody.innerHTML = `<tr><td>${p.name}</td><td>${p.sku}</td><td>${p.scanned}</td><td>${k11Data.destContainer || '—'}</td></tr>`;
+  document.getElementById('k11-modal').classList.add('vis');
+}
+
+function k11Submit() {
+  document.getElementById('k11-modal').classList.remove('vis');
+  // Show snackbar over top nav
+  const snackbar = document.getElementById('k11-snackbar');
+  snackbar.classList.add('vis');
+  document.getElementById('k11-snackbar-text').textContent = `Kitting completed — ${k11Data.products[0].scanned} units → ${k11Data.destContainer}`;
+
+  // Auto-refresh after 2.5 seconds
+  setTimeout(() => {
+    location.reload();
+  }, 2500);
+}
+// === 1 Container Many Combos Flow ===
+const k1mData = {
+  client: 'Mamaearth (Honasa Consumer Pvt Ltd)',
+  container: '',
+  products: [
+    { name: 'ME Multani Mitti Face Wash 100ML', sku: '#2928442', scanId: '7829920000288837237', units: 264, scanned: 0, confirmed: false, printed: false, dest: '' },
+    { name: 'ME Rosemary Hair Fall Shampoo 250ML', sku: '#2928443', scanId: '7829920000288837238', units: 350, scanned: 0, confirmed: false, printed: false, dest: '' }
+  ],
+  currentProductIdx: -1,
+  totalCompleted: 0
+};
+
+function k1mScanContainer() {
+  const input = document.getElementById('k1m-ci');
+  const val = input.value.trim() || 'CONT_8819000200010';
+  k1mData.container = val;
+  input.value = val;
+  document.getElementById('k1m-container-box').style.borderColor = 'var(--success)';
+  document.getElementById('k1m-container-box').style.background = '#fafff9';
+
+  document.getElementById('k1m-left-empty').style.display = 'none';
+  const lc = document.getElementById('k1m-left-content');
+  lc.style.display = 'block';
+  lc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching container details</div></div>';
+  setTimeout(() => { k1mShowContainerDetails(); }, 1200);
+}
+
+function k1mShowContainerDetails() {
+  const lc = document.getElementById('k1m-left-content');
+  let accHtml = '';
+  k1mData.products.forEach((p, i) => {
+    accHtml += `
+      <div class="accordion" id="k1m-acc-${i}">
+        <div class="acc-header open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('hidden')">
+          Master SKU #${i+1}
+          <span class="badge badge-info" style="margin-left:8px;">1:1</span>
+          <span class="arrow material-icons-outlined">keyboard_arrow_down</span>
+        </div>
+        <div class="acc-body">
+          <div class="total-row"><span>Total units:</span><span class="badge badge-info">${p.units}</span></div>
+          <div class="sku-item">
+            <div class="sku-info">
+              <div class="sku-name">${p.name}</div>
+              <div class="sku-meta">SKU: ${p.sku}<br>Scannable ID: ${p.scanId}</div>
+            </div>
+            <div class="sku-qty">${p.units} units</div>
+            <span class="badge badge-info" id="k1m-badge-${i}">0</span>
+          </div>
+        </div>
+      </div>`;
+  });
+  lc.innerHTML = `
+    <div class="fade-in">
+      <div style="padding:16px;font-size:14px;font-weight:600;color:var(--text-heading);">Container attributes</div>
+      <div class="info-card">
+        <div class="value">${k1mData.client}</div>
+        <div class="label">Client &bull; ${k1mData.container} &bull; <b>${k1mData.products.length} combo types</b></div>
+      </div>
+      ${accHtml}
+      <div class="progress-section" id="k1m-progress">
+        <div class="progress-label"><span class="lbl">Completed SKUs</span><span class="val" id="k1m-prog-val">0 / ${k1mData.products.length}</span></div>
+        <div class="progress-track"><div class="progress-fill" id="k1m-prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>`;
+  // Enable product scan
+  document.getElementById('k1m-prod-label').classList.remove('disabled');
+  document.getElementById('k1m-product-box').classList.remove('disabled');
+  document.getElementById('k1m-pi').disabled = false;
+  document.getElementById('k1m-pi').focus();
+}
+
+function k1mScanProduct() {
+  const input = document.getElementById('k1m-pi');
+  if (!input.value.trim()) return;
+  input.value = '';
+
+  // Pick the next unfinished product
+  let idx = k1mData.products.findIndex(p => !p.confirmed);
+  if (idx === -1) return;
+  k1mData.currentProductIdx = idx;
+  const p = k1mData.products[idx];
+  p.scanned++;
+
+  // Show loading on first scan for this product
+  document.getElementById('k1m-right-empty').style.display = 'none';
+  const rc = document.getElementById('k1m-right-content');
+  rc.style.display = 'block';
+  if (p.scanned === 1) {
+    rc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching product details</div></div>';
+    setTimeout(() => { k1mRenderRight(); }, 800);
+  } else {
+    k1mRenderRight();
+  }
+}
+
+function k1mRenderRight() {
+  const idx = k1mData.currentProductIdx;
+  const p = k1mData.products[idx];
+  const rc = document.getElementById('k1m-right-content');
+
+  // Update badge on left
+  document.getElementById(`k1m-badge-${idx}`).textContent = p.scanned;
+
+  rc.innerHTML = `
+    <div class="fade-in" style="padding:16px;">
+      <div class="scan-log-header">
+        <span class="title">Scan Log: ${p.sku}</span>
+        <button class="btn btn-primary btn-sm" id="k1m-print-btn" ${!p.confirmed ? 'disabled' : ''} onclick="k1mPrintBarcode()">${p.printed ? 'Re-print barcode' : 'Print barcode'}</button>
+      </div>
+      <div class="product-details" style="margin:8px 0 16px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-meta">SKU: ${p.sku} <span class="material-icons-outlined" style="font-size:14px;vertical-align:middle;color:var(--info);cursor:pointer;">launch</span><br>Scannable ID: ${p.scanId}</div>
+          </div>
+          <div class="input-field" style="width:218px;">
+            <div class="input-box">
+              <input value="${p.scanned}" style="text-align:center;font-weight:600;" id="k1m-qty-input" ${p.confirmed ? 'disabled style="text-align:center;font-weight:600;background:#f9f9fb;"' : ''} onkeydown="if(event.key==='Enter')k1mConfirmQty()">
+              ${p.confirmed ? '<span class="material-icons-outlined" style="font-size:16px;cursor:pointer;color:var(--text-base);" onclick="k1mResetQty()">close</span>' : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+      ${p.printed ? `
+      <div class="divider"></div>
+      <div style="margin-top:16px;">
+        <label style="font-size:14px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:8px;">Destination container</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border-primary);border-radius:var(--radius-default);background:var(--bg-primary);">
+            <span class="material-icons-outlined" style="font-size:18px;color:var(--text-base);">qr_code_scanner</span>
+            <input id="k1m-dest" placeholder="Scan destination container" value="${p.dest}" style="border:none;outline:none;flex:1;font-size:14px;font-family:inherit;font-weight:500;background:transparent;" oninput="k1mToggleConfirm()" onkeydown="if(event.key==='Enter')k1mScanDest()">
+          </div>
+          <button class="btn btn-primary" id="k1m-confirm-btn" ${!p.dest ? 'disabled' : ''} onclick="k1mScanDest()">Confirm</button>
+        </div>
+        ${p.dest ? `<div style="margin-top:8px;display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--success-bg);border:1px solid #a7d7b8;border-radius:var(--radius-default);font-size:13px;color:var(--success);"><span class="material-icons-outlined" style="font-size:16px;">check_circle</span><b>${p.dest}</b>&nbsp;verified</div>` : ''}
+      </div>` : ''}
+    </div>`;
+}
+
+function k1mConfirmQty() {
+  const idx = k1mData.currentProductIdx;
+  const inp = document.getElementById('k1m-qty-input');
+  const val = parseInt(inp.value) || 0;
+  if (val <= 0) return;
+  k1mData.products[idx].scanned = val;
+  k1mData.products[idx].confirmed = true;
+  document.getElementById(`k1m-badge-${idx}`).textContent = val;
+  k1mRenderRight();
+}
+
+function k1mResetQty() {
+  const idx = k1mData.currentProductIdx;
+  k1mData.products[idx].confirmed = false;
+  k1mData.products[idx].printed = false;
+  k1mData.products[idx].dest = '';
+  k1mRenderRight();
+  setTimeout(() => { const inp = document.getElementById('k1m-qty-input'); if(inp) inp.focus(); }, 100);
+}
+
+function k1mPrintBarcode() {
+  const idx = k1mData.currentProductIdx;
+  k1mData.products[idx].printed = true;
+  k1mRenderRight();
+}
+
+function k1mToggleConfirm() {
+  const input = document.getElementById('k1m-dest');
+  const btn = document.getElementById('k1m-confirm-btn');
+  if (input && btn) btn.disabled = !input.value.trim();
+}
+
+function k1mScanDest() {
+  const input = document.getElementById('k1m-dest');
+  const val = input.value.trim() || 'GGNFC20.PUTAWAY';
+  input.value = val;
+  const idx = k1mData.currentProductIdx;
+  k1mData.products[idx].dest = val;
+  k1mData.totalCompleted++;
+
+  // Update overall progress
+  document.getElementById('k1m-prog-val').textContent = `${k1mData.totalCompleted} / ${k1mData.products.length}`;
+  document.getElementById('k1m-prog-fill').style.width = Math.round((k1mData.totalCompleted / k1mData.products.length) * 100) + '%';
+
+  k1mRenderRight();
+
+  // Check if all done
+  if (k1mData.totalCompleted >= k1mData.products.length) {
+    setTimeout(() => { k1mReview(); }, 500);
+  } else {
+    // Prompt to scan next product
+    setTimeout(() => {
+      const rc = document.getElementById('k1m-right-content');
+      rc.innerHTML += `<div class="fade-in" style="padding:0 16px 16px;"><div style="padding:12px;background:var(--info-bg);border:1px solid var(--info);border-radius:var(--radius-default);font-size:13px;color:var(--info);display:flex;align-items:center;gap:8px;"><span class="material-icons-outlined" style="font-size:16px;">info</span>SKU #${idx+1} saved. Scan the next product to continue.</div></div>`;
+      document.getElementById('k1m-pi').focus();
+    }, 300);
+  }
+}
+
+function k1mReview() {
+  let rows = '';
+  k1mData.products.forEach(p => {
+    rows += `<tr><td>${p.name}</td><td>${p.sku}</td><td>${p.scanned}</td><td>${p.dest}</td></tr>`;
+  });
+  document.getElementById('k11-review-body').innerHTML = rows;
+  document.getElementById('k11-modal').querySelector('.modal-header').childNodes[0].textContent = 'Review Kitting Details ';
+  document.getElementById('k11-modal').querySelector('.modal-footer .btn-primary').setAttribute('onclick', 'k1mSubmit()');
+  document.getElementById('k11-modal').classList.add('vis');
+}
+
+function k1mSubmit() {
+  document.getElementById('k11-modal').classList.remove('vis');
+  const snackbar = document.getElementById('k11-snackbar');
+  snackbar.classList.add('vis');
+  document.getElementById('k11-snackbar-text').textContent = `Kitting completed — ${k1mData.products.length} SKUs processed from ${k1mData.container}`;
+  setTimeout(() => { location.reload(); }, 2500);
+}
+
+// === Many Containers 1 Combo Flow ===
+const km1Data = {
+  client: 'Mamaearth (Honasa Consumer Pvt Ltd)',
+  containers: [
+    { id: 'CONT_8819000200010', product: 'ME Rice Oil-Free Face Moisturizer 230 ML', sku: '#2928442', scanId: '7829920000288837237', units: 264 },
+    { id: 'CONT_8819000200011', product: 'ME Rice Water Dewy Active Serum 100 ML', sku: '#2928443', scanId: '7829920000288837238', units: 350 },
+    { id: 'CONT_8819000200012', product: 'ME Rice Dewy Bright Face Wash 250 ML', sku: '#2928444', scanId: '7829920000288837239', units: 300 }
+  ],
+  associatedContainers: ['CONT_8819000200010', 'CONT_8819000200011', 'CONT_8819000200012'],
+  scannedContainers: [],
+  allContainersScanned: false,
+  products: [],
+  currentProductIdx: -1,
+  totalScanned: 0,
+  totalUnits: 0,
+  qtyConfirmed: false,
+  printed: false,
+  destContainer: ''
+};
+
+function km1ScanContainer() {
+  const input = document.getElementById('km1-ci');
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = '';
+
+  if (km1Data.scannedContainers.includes(val)) return;
+  km1Data.scannedContainers.push(val);
+
+  document.getElementById('km1-container-box').style.borderColor = 'var(--success)';
+  document.getElementById('km1-container-box').style.background = '#fafff9';
+  document.getElementById('km1-left-empty').style.display = 'none';
+  const lc = document.getElementById('km1-left-content');
+  lc.style.display = 'block';
+
+  // Show loading on first scan
+  if (km1Data.scannedContainers.length === 1) {
+    lc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching container details</div></div>';
+    setTimeout(() => { km1RenderLeft(); }, 1000);
+  } else {
+    km1RenderLeft();
+  }
+
+  if (km1Data.scannedContainers.length >= km1Data.containers.length) {
+    km1Data.allContainersScanned = true;
+    document.getElementById('km1-ci').placeholder = 'All containers scanned ✓';
+    document.getElementById('km1-ci').disabled = true;
+    // Enable product scan
+    document.getElementById('km1-prod-label').classList.remove('disabled');
+    document.getElementById('km1-product-box').classList.remove('disabled');
+    document.getElementById('km1-pi').disabled = false;
+    setTimeout(() => { document.getElementById('km1-pi').focus(); }, 1100);
+    // Build products list from all containers
+    km1Data.products = km1Data.containers.map(c => ({ name: c.product, sku: c.sku, scanId: c.scanId, units: c.units, scanned: 0 }));
+    km1Data.totalUnits = km1Data.products.reduce((s, p) => s + p.units, 0);
+  } else {
+    setTimeout(() => { document.getElementById('km1-ci').focus(); }, 100);
+  }
+}
+
+function km1RenderLeft() {
+  const lc = document.getElementById('km1-left-content');
+  const total = km1Data.containers.length;
+  const scanned = km1Data.scannedContainers.length;
+
+  let pillsHtml = km1Data.scannedContainers.map(c => `<span class="pill scanned">${c} ✓</span>`).join('');
+  if (scanned < total) {
+    for (let i = scanned; i < total; i++) {
+      if (i === scanned) pillsHtml += `<span class="pill" style="background:var(--warning-bg);color:var(--warning);border-color:#fde68a;">Container ${i+1} ⟳</span>`;
+      else pillsHtml += `<span class="pill">Container ${i+1}</span>`;
+    }
+  }
+
+  let infoCards = km1Data.scannedContainers.map((cId, i) => {
+    const c = km1Data.containers[i];
+    if (!c) return '';
+    return `
+      <div class="accordion" style="margin:0 16px 8px;">
+        <div class="acc-header open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('hidden')">
+          Container ${i+1}: ${cId}
+          <span class="arrow material-icons-outlined">keyboard_arrow_down</span>
+        </div>
+        <div class="acc-body">
+          <div class="total-row"><span>Total units:</span><span class="badge badge-info">${c.units}</span></div>
+          <div class="sku-item">
+            <div class="sku-info">
+              <div class="sku-name">${c.product}</div>
+              <div class="sku-meta">SKU: ${c.sku}<br>Scannable ID: ${c.scanId}</div>
+            </div>
+            <div class="sku-qty">${c.units} units</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  let accHtml = '';
+
+  lc.innerHTML = `
+    <div class="fade-in">
+      <div style="padding:16px;font-size:14px;font-weight:600;color:var(--text-heading);">Container attributes</div>
+      <div class="info-card">
+        <div class="value">${km1Data.client}</div>
+        <div class="label">${scanned} / ${total} containers scanned</div>
+      </div>
+      <div style="padding:0 16px 12px;">
+        <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">Associated containers:</div>
+        <div class="pills">${pillsHtml}</div>
+      </div>
+      ${infoCards}
+      ${km1Data.allContainersScanned ? `
+      <div class="progress-section" id="km1-progress">
+        <div class="progress-label"><span class="lbl">Scanned</span><span class="val" id="km1-prog-val">${km1Data.totalScanned} / ${km1Data.totalUnits}</span></div>
+        <div class="progress-track"><div class="progress-fill" id="km1-prog-fill" style="width:${Math.round((km1Data.totalScanned/km1Data.totalUnits)*100)}%"></div></div>
+      </div>` : ''}
+    </div>`;
+}
+
+function km1ScanProduct() {
+  const input = document.getElementById('km1-pi');
+  if (!input.value.trim()) return;
+  input.value = '';
+  if (!km1Data.allContainersScanned) return;
+
+  // Pick first product with room
+  let idx = km1Data.products.findIndex(p => p.scanned < p.units);
+  if (idx === -1) idx = 0;
+  km1Data.currentProductIdx = idx;
+  km1Data.products[idx].scanned++;
+  km1Data.totalScanned++;
+
+  document.getElementById('km1-right-empty').style.display = 'none';
+  const rc = document.getElementById('km1-right-content');
+  rc.style.display = 'block';
+
+  if (km1Data.totalScanned === 1) {
+    rc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching product details</div></div>';
+    setTimeout(() => { km1RenderRight(); km1RenderLeft(); }, 800);
+  } else {
+    km1RenderRight();
+    km1RenderLeft();
+  }
+}
+
+function km1RenderRight() {
+  const rc = document.getElementById('km1-right-content');
+  const allProducts = km1Data.products;
+
+  rc.innerHTML = `
+    <div class="fade-in" style="padding:16px;">
+      <div class="scan-log-header">
+        <span class="title">Scan Log: ${allProducts.map(p=>p.sku).join(', ')}</span>
+        <button class="btn btn-primary btn-sm" id="km1-print-btn" ${!km1Data.qtyConfirmed ? 'disabled' : ''} onclick="km1PrintBarcode()">${km1Data.printed ? 'Re-print barcode' : 'Print barcode'}</button>
+      </div>
+      ${allProducts.map((p, i) => `
+      <div class="product-details" style="margin:8px 0;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-meta">SKU: ${p.sku}<br>Scannable ID: ${p.scanId}</div>
+          </div>
+          <div class="input-field" style="width:160px;">
+            <div class="input-box">
+              <input value="${p.scanned}" style="text-align:center;font-weight:600;" id="km1-qty-${i}" ${km1Data.qtyConfirmed ? 'disabled style="text-align:center;font-weight:600;background:#f9f9fb;"' : ''} onkeydown="if(event.key==='Enter')km1ConfirmQty()">
+            </div>
+          </div>
+        </div>
+      </div>`).join('')}
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+        ${km1Data.qtyConfirmed ? '' : '<span style="font-size:12px;color:var(--text-base);">Press Enter in any qty field to confirm all</span>'}
+      </div>
+      ${km1Data.printed ? `
+      <div class="divider"></div>
+      <div style="margin-top:16px;">
+        <label style="font-size:14px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:8px;">Destination container</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border-primary);border-radius:var(--radius-default);background:var(--bg-primary);">
+            <span class="material-icons-outlined" style="font-size:18px;color:var(--text-base);">qr_code_scanner</span>
+            <input id="km1-dest" placeholder="Scan destination container" value="${km1Data.destContainer}" style="border:none;outline:none;flex:1;font-size:14px;font-family:inherit;font-weight:500;background:transparent;" oninput="km1ToggleConfirm()" onkeydown="if(event.key==='Enter')km1ScanDest()">
+          </div>
+          <button class="btn btn-primary" id="km1-confirm-btn" ${!km1Data.destContainer ? 'disabled' : ''} onclick="km1ScanDest()">Confirm</button>
+        </div>
+        ${km1Data.destContainer ? `<div style="margin-top:8px;display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--success-bg);border:1px solid #a7d7b8;border-radius:var(--radius-default);font-size:13px;color:var(--success);"><span class="material-icons-outlined" style="font-size:16px;">check_circle</span><b>${km1Data.destContainer}</b>&nbsp;verified</div>
+        <div style="margin-top:12px;"><button class="btn btn-primary" onclick="km1Review()"><span class="material-icons-outlined" style="font-size:16px;">visibility</span>Review & Submit</button></div>` : ''}
+      </div>` : ''}
+    </div>`;
+}
+
+function km1ConfirmQty() {
+  km1Data.products.forEach((p, i) => {
+    const inp = document.getElementById(`km1-qty-${i}`);
+    if (inp) p.scanned = parseInt(inp.value) || 0;
+  });
+  km1Data.totalScanned = km1Data.products.reduce((s, p) => s + p.scanned, 0);
+  km1Data.qtyConfirmed = true;
+  km1RenderRight();
+  km1RenderLeft();
+}
+
+function km1ResetQty() {
+  km1Data.qtyConfirmed = false;
+  km1Data.printed = false;
+  km1Data.destContainer = '';
+  km1RenderRight();
+}
+
+function km1PrintBarcode() {
+  km1Data.printed = true;
+  km1RenderRight();
+}
+
+function km1ToggleConfirm() {
+  const input = document.getElementById('km1-dest');
+  const btn = document.getElementById('km1-confirm-btn');
+  if (input && btn) btn.disabled = !input.value.trim();
+}
+
+function km1ScanDest() {
+  const input = document.getElementById('km1-dest');
+  const val = input.value.trim() || 'GGNFC20.PUTAWAY';
+  input.value = val;
+  km1Data.destContainer = val;
+  km1RenderRight();
+}
+
+function km1Review() {
+  let rows = '';
+  km1Data.products.forEach(p => {
+    rows += `<tr><td>${p.name}</td><td>${p.sku}</td><td>${p.scanned}</td><td>${km1Data.destContainer}</td></tr>`;
+  });
+  document.getElementById('k11-review-body').innerHTML = rows;
+  document.getElementById('k11-modal').querySelector('.modal-footer .btn-primary').setAttribute('onclick', 'km1Submit()');
+  document.getElementById('k11-modal').classList.add('vis');
+}
+
+function km1Submit() {
+  document.getElementById('k11-modal').classList.remove('vis');
+  const snackbar = document.getElementById('k11-snackbar');
+  snackbar.classList.add('vis');
+  document.getElementById('k11-snackbar-text').textContent = `Kitting completed — ${km1Data.products.length} SKUs from ${km1Data.scannedContainers.length} containers → ${km1Data.destContainer}`;
+  setTimeout(() => { location.reload(); }, 2500);
+}
+
+// === Many Containers Many Combos Flow ===
+const kmmData = {
+  client: 'Mamaearth (Honasa Consumer Pvt Ltd)',
+  containers: [
+    { id: 'CONT-870A', product: 'ME Rosemary Hair Fall Oil 250ML', sku: '#2928442', scanId: '7829920000288837237', units: 264 },
+    { id: 'CONT-870B', product: 'ME Rosemary Hair Fall Shampoo 250ML', sku: '#2928443', scanId: '7829920000288837238', units: 350 },
+    { id: 'CONT-870C', product: 'Mamaearth Vitamin C Daily Glow Sunscreen SPF50 - 80g', sku: '#2928444', scanId: '7829920000288837239', units: 300 },
+    { id: 'CONT-870D', product: 'Mamaearth Vitamin C Daily Glow Face Wash - 100g', sku: '#2928445', scanId: '7829920000288837240', units: 280 }
+  ],
+  combos: [
+    { name: 'Combo 1: Rosemary Hair Care Set', skus: [
+      { name: 'ME Rosemary Hair Fall Oil 250ML', sku: '#2928442', scanId: '7829920000288837237', units: 264, scanned: 0, confirmed: false },
+      { name: 'ME Rosemary Hair Fall Shampoo 250ML', sku: '#2928443', scanId: '7829920000288837238', units: 350, scanned: 0, confirmed: false }
+    ], printed: false, dest: '' },
+    { name: 'Combo 2: Vitamin C Glow Set', skus: [
+      { name: 'Mamaearth Vitamin C Daily Glow Sunscreen SPF50 - 80g', sku: '#2928444', scanId: '7829920000288837239', units: 300, scanned: 0, confirmed: false },
+      { name: 'Mamaearth Vitamin C Daily Glow Face Wash - 100g', sku: '#2928445', scanId: '7829920000288837240', units: 280, scanned: 0, confirmed: false }
+    ], printed: false, dest: '' }
+  ],
+  scannedContainers: [],
+  allContainersScanned: false,
+  currentComboIdx: 0,
+  currentSkuIdx: 0,
+  totalCombosCompleted: 0
+};
+
+function kmmScanContainer() {
+  const input = document.getElementById('kmm-ci');
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = '';
+
+  if (kmmData.scannedContainers.includes(val)) return;
+  kmmData.scannedContainers.push(val);
+
+  document.getElementById('kmm-container-box').style.borderColor = 'var(--success)';
+  document.getElementById('kmm-container-box').style.background = '#fafff9';
+  document.getElementById('kmm-left-empty').style.display = 'none';
+  const lc = document.getElementById('kmm-left-content');
+  lc.style.display = 'block';
+
+  if (kmmData.scannedContainers.length === 1) {
+    lc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching container details</div></div>';
+    setTimeout(() => { kmmRenderLeft(); }, 1000);
+  } else {
+    kmmRenderLeft();
+  }
+
+  if (kmmData.scannedContainers.length >= kmmData.containers.length) {
+    kmmData.allContainersScanned = true;
+    document.getElementById('kmm-ci').placeholder = 'All containers scanned ✓';
+    document.getElementById('kmm-ci').disabled = true;
+    document.getElementById('kmm-prod-label').classList.remove('disabled');
+    document.getElementById('kmm-product-box').classList.remove('disabled');
+    document.getElementById('kmm-pi').disabled = false;
+    setTimeout(() => { document.getElementById('kmm-pi').focus(); }, 1100);
+  } else {
+    setTimeout(() => { document.getElementById('kmm-ci').focus(); }, 100);
+  }
+}
+
+function kmmRenderLeft() {
+  const lc = document.getElementById('kmm-left-content');
+  const total = kmmData.containers.length;
+  const scanned = kmmData.scannedContainers.length;
+
+  let pillsHtml = kmmData.scannedContainers.map(c => `<span class="pill scanned">${c} ✓</span>`).join('');
+  if (scanned < total) {
+    for (let i = scanned; i < total; i++) {
+      if (i === scanned) pillsHtml += `<span class="pill" style="background:var(--warning-bg);color:var(--warning);border-color:#fde68a;">Container ${i+1} ⟳</span>`;
+      else pillsHtml += `<span class="pill">Container ${i+1}</span>`;
+    }
+  }
+
+  let accHtml = kmmData.scannedContainers.map((cId, i) => {
+    const c = kmmData.containers[i];
+    if (!c) return '';
+    return `
+      <div class="accordion" style="margin:0 16px 8px;">
+        <div class="acc-header open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('hidden')">
+          Container ${i+1}: ${cId}
+          <span class="arrow material-icons-outlined">keyboard_arrow_down</span>
+        </div>
+        <div class="acc-body">
+          <div class="total-row"><span>Total units:</span><span class="badge badge-info">${c.units}</span></div>
+          <div class="sku-item">
+            <div class="sku-info">
+              <div class="sku-name">${c.product}</div>
+              <div class="sku-meta">SKU: ${c.sku}<br>Scannable ID: ${c.scanId}</div>
+            </div>
+            <div class="sku-qty">${c.units} units</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  lc.innerHTML = `
+    <div class="fade-in">
+      <div style="padding:16px;font-size:14px;font-weight:600;color:var(--text-heading);">Container attributes</div>
+      <div class="info-card">
+        <div class="value">${kmmData.client}</div>
+        <div class="label">${scanned} / ${total} containers scanned &bull; <b>${total} combo types</b></div>
+      </div>
+      <div style="padding:0 16px 12px;">
+        <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">Associated containers:</div>
+        <div class="pills">${pillsHtml}</div>
+      </div>
+      ${accHtml}
+      ${kmmData.allContainersScanned ? `
+      <div class="progress-section">
+        <div class="progress-label"><span class="lbl">Kitting progress</span><span class="val" id="kmm-prog-val">${Math.round((kmmData.totalCombosCompleted/kmmData.combos.length)*100)}%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="kmm-prog-fill" style="width:${Math.round((kmmData.totalCombosCompleted/kmmData.combos.length)*100)}%"></div></div>
+        <div style="font-size:11px;color:var(--text-base);margin-top:4px;">${kmmData.combos.length} combos | ${kmmData.totalCombosCompleted}/${kmmData.combos.length} completed</div>
+      </div>` : ''}
+    </div>`;
+}
+
+function kmmScanProduct() {
+  const input = document.getElementById('kmm-pi');
+  if (!input.value.trim()) return;
+  input.value = '';
+  if (!kmmData.allContainersScanned) return;
+  const combo = kmmData.combos[kmmData.currentComboIdx];
+  if (!combo) return;
+  const sku = combo.skus[kmmData.currentSkuIdx];
+  if (!sku || sku.confirmed) return;
+  sku.scanned++;
+  document.getElementById('kmm-right-empty').style.display = 'none';
+  const rc = document.getElementById('kmm-right-content');
+  rc.style.display = 'block';
+  if (sku.scanned === 1 && kmmData.currentSkuIdx === 0 && kmmData.totalCombosCompleted === 0) {
+    rc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching product details</div></div>';
+    setTimeout(() => { kmmRenderRight(); }, 800);
+  } else { kmmRenderRight(); }
+}
+
+function kmmRenderRight() {
+  const rc = document.getElementById('kmm-right-content');
+  const combo = kmmData.combos[kmmData.currentComboIdx];
+  const allSkusConfirmed = combo.skus.every(s => s.confirmed);
+
+  // Info snackbar at top if there's a next SKU to scan
+  let infoSnackbar = '';
+  const nextUnconfirmed = combo.skus.findIndex(s => !s.confirmed);
+  if (nextUnconfirmed !== -1 && combo.skus.some(s => s.confirmed)) {
+    infoSnackbar = `<div style="padding:10px 12px;background:var(--info-bg);border:1px solid var(--info);border-radius:var(--radius-default);font-size:13px;color:var(--info);display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span class="material-icons-outlined" style="font-size:16px;">info</span>Scan <b>${combo.skus[nextUnconfirmed].name}</b> next to maintain combination consistency</div>`;
+  }
+
+  // Product cards for all SKUs that have been scanned (scanned > 0 or confirmed)
+  let productCards = combo.skus.filter(s => s.scanned > 0 || s.confirmed).map((s, i) => {
+    const isEditable = !s.confirmed;
+    return `<div class="product-details" style="margin-bottom:8px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+        <div>
+          <div class="product-name">${s.name}</div>
+          <div class="product-meta">SKU: ${s.sku} <span class="material-icons-outlined" style="font-size:14px;vertical-align:middle;color:var(--info);cursor:pointer;">launch</span><br>Scannable ID: ${s.scanId}</div>
+        </div>
+        <div class="input-field" style="width:180px;">
+          <div class="input-box">
+            <input value="${s.scanned}" style="text-align:center;font-weight:600;${!isEditable ? 'background:#f9f9fb;' : ''}" id="kmm-qty-${i}" ${!isEditable ? 'disabled' : ''} onkeydown="if(event.key==='Enter')kmmConfirmSkuQty(${i})">
+            ${!isEditable ? `<span class="material-icons-outlined" style="font-size:16px;cursor:pointer;color:var(--text-base);" onclick="kmmResetSkuQty(${i})">close</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  rc.innerHTML = `<div class="fade-in" style="padding:16px;">
+    <div class="scan-log-header"><span class="title">${combo.name}</span><button class="btn btn-primary btn-sm" ${!allSkusConfirmed ? 'disabled' : ''} onclick="kmmPrintBarcode()">${combo.printed ? 'Re-print barcode' : 'Print barcode'}</button></div>
+    ${infoSnackbar}
+    ${productCards}
+    ${combo.printed ? `<div class="divider"></div><div style="margin-top:16px;"><label style="font-size:14px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:8px;">Destination container (for combo)</label><div style="display:flex;gap:8px;align-items:center;"><div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border-primary);border-radius:var(--radius-default);background:var(--bg-primary);"><span class="material-icons-outlined" style="font-size:18px;color:var(--text-base);">qr_code_scanner</span><input id="kmm-dest" placeholder="Scan destination container" value="${combo.dest}" style="border:none;outline:none;flex:1;font-size:14px;font-family:inherit;font-weight:500;background:transparent;" oninput="kmmToggleConfirm()" onkeydown="if(event.key==='Enter')kmmScanDest()"></div><button class="btn btn-primary" id="kmm-confirm-btn" ${!combo.dest ? 'disabled' : ''} onclick="kmmScanDest()">Confirm</button></div>${combo.dest ? `<div style="margin-top:8px;display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--success-bg);border:1px solid #a7d7b8;border-radius:var(--radius-default);font-size:13px;color:var(--success);"><span class="material-icons-outlined" style="font-size:16px;">check_circle</span><b>${combo.dest}</b>&nbsp;verified</div>` : ''}</div>` : ''}
+  </div>`;
+}
+
+function kmmConfirmSkuQty(skuIdx) {
+  const combo = kmmData.combos[kmmData.currentComboIdx];
+  const inp = document.getElementById(`kmm-qty-${skuIdx}`);
+  const val = parseInt(inp.value) || 0;
+  if (val <= 0) return;
+  combo.skus[skuIdx].scanned = val;
+  combo.skus[skuIdx].confirmed = true;
+  // Move currentSkuIdx to next unconfirmed
+  const nextIdx = combo.skus.findIndex(s => !s.confirmed);
+  if (nextIdx !== -1) kmmData.currentSkuIdx = nextIdx;
+  kmmRenderRight();
+}
+
+function kmmResetSkuQty(skuIdx) {
+  const combo = kmmData.combos[kmmData.currentComboIdx];
+  combo.skus[skuIdx].confirmed = false;
+  combo.printed = false;
+  combo.dest = '';
+  kmmData.currentSkuIdx = skuIdx;
+  kmmRenderRight();
+  setTimeout(() => { const inp = document.getElementById(`kmm-qty-${skuIdx}`); if(inp) inp.focus(); }, 100);
+}
+
+function kmmPrintBarcode() { kmmData.combos[kmmData.currentComboIdx].printed = true; kmmRenderRight(); }
+
+function kmmToggleConfirm() {
+  const input = document.getElementById('kmm-dest');
+  const btn = document.getElementById('kmm-confirm-btn');
+  if (input && btn) btn.disabled = !input.value.trim();
+}
+
+function kmmScanDest() {
+  const input = document.getElementById('kmm-dest');
+  const val = input.value.trim() || 'GGNFC20.PUTAWAY';
+  input.value = val;
+  kmmData.combos[kmmData.currentComboIdx].dest = val;
+  kmmData.totalCombosCompleted++;
+  const progVal = document.getElementById('kmm-prog-val');
+  const progFill = document.getElementById('kmm-prog-fill');
+  if (progVal) progVal.textContent = `${Math.round((kmmData.totalCombosCompleted / kmmData.combos.length) * 100)}%`;
+  if (progFill) progFill.style.width = Math.round((kmmData.totalCombosCompleted / kmmData.combos.length) * 100) + '%';
+  if (kmmData.totalCombosCompleted >= kmmData.combos.length) {
+    kmmRenderRight(); setTimeout(() => { kmmReview(); }, 500);
+  } else {
+    kmmData.currentComboIdx++; kmmData.currentSkuIdx = 0;
+    const rc = document.getElementById('kmm-right-content');
+    rc.innerHTML = `<div class="fade-in" style="padding:16px;"><div style="padding:12px;background:var(--info-bg);border:1px solid var(--info);border-radius:var(--radius-default);font-size:13px;color:var(--info);display:flex;align-items:center;gap:8px;"><span class="material-icons-outlined" style="font-size:16px;">info</span>Combo saved. Scan the next product for <b>${kmmData.combos[kmmData.currentComboIdx].name}</b>.</div></div>`;
+    document.getElementById('kmm-pi').focus();
+  }
+}
+
+function kmmReview() {
+  let rows = '';
+  kmmData.combos.forEach(combo => { combo.skus.forEach(s => { rows += `<tr><td>${s.name}</td><td>${s.sku}</td><td>${s.scanned}</td><td>${combo.dest}</td></tr>`; }); });
+  document.getElementById('k11-review-body').innerHTML = rows;
+  document.getElementById('k11-modal').querySelector('.modal-footer .btn-primary').setAttribute('onclick', 'kmmSubmit()');
+  document.getElementById('k11-modal').classList.add('vis');
+}
+
+function kmmSubmit() {
+  document.getElementById('k11-modal').classList.remove('vis');
+  document.getElementById('k11-snackbar').classList.add('vis');
+  document.getElementById('k11-snackbar-text').textContent = `Kitting completed — ${kmmData.combos.length} combos from ${kmmData.scannedContainers.length} containers`;
+  setTimeout(() => { location.reload(); }, 2500);
+}
+
+// === De-Kit: 1 Container 1 Combo ===
+const dk11Data = {
+  client: 'Mamaearth (Honasa Consumer Pvt Ltd)',
+  container: '',
+  comboName: 'ME Rosemary Hair Care Combo Set',
+  comboSku: 'MSKU-ME-ROSEMARY-2PC',
+  assembledQty: 8,
+  products: [
+    { name: 'ME Rosemary Hair Fall Oil 250ML', sku: '#2928442', scanId: '7829920000288837237', scanned: 0, confirmed: false },
+    { name: 'ME Rosemary Hair Fall Shampoo 250ML', sku: '#2928443', scanId: '7829920000288837238', scanned: 0, confirmed: false }
+  ],
+  allConfirmed: false,
+  printed: false,
+  destContainer: ''
+};
+
+function dk11ScanContainer() {
+  const input = document.getElementById('dk11-ci');
+  const val = input.value.trim() || 'CONT_8819000200010';
+  dk11Data.container = val; input.value = val;
+  document.getElementById('dk11-container-box').style.borderColor = 'var(--success)';
+  document.getElementById('dk11-container-box').style.background = '#fafff9';
+  document.getElementById('dk11-left-empty').style.display = 'none';
+  const lc = document.getElementById('dk11-left-content');
+  lc.style.display = 'block';
+  lc.innerHTML = '<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching container details</div></div>';
+  setTimeout(() => { dk11RenderLeft(); }, 1200);
+}
+
+function dk11RenderLeft() {
+  const lc = document.getElementById('dk11-left-content');
+  const totalOut = dk11Data.products.reduce((s, p) => s + p.scanned, 0);
+  const totalExpected = dk11Data.assembledQty * dk11Data.products.length;
+  lc.innerHTML = `<div class="fade-in">
+    <div style="padding:16px;font-size:14px;font-weight:600;color:var(--text-heading);">Container attributes</div>
+    <div class="info-card"><div class="value">${dk11Data.client}</div><div class="label">Container: ${dk11Data.container} &bull; 1 Combo (assembled)</div></div>
+    <div style="padding:8px 16px;"><div style="padding:8px 12px;background:var(--warning-bg);border-radius:var(--radius-default);font-size:13px;color:var(--warning);font-weight:500;text-align:center;"><b>De-kit:</b> Break into ${dk11Data.products.length} individual products</div></div>
+    <div class="accordion">
+      <div class="acc-header open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('hidden')">
+        ${dk11Data.comboName} <span class="badge badge-warning" style="margin-left:8px;">Assembled x${dk11Data.assembledQty}</span>
+        <span class="arrow material-icons-outlined">keyboard_arrow_down</span>
+      </div>
+      <div class="acc-body">
+        ${dk11Data.products.map(p => `<div class="sku-item"><div class="sku-info"><div class="sku-name">${p.name}</div><div class="sku-meta">SKU: ${p.sku}</div></div><div class="sku-qty">${p.scanned}/${dk11Data.assembledQty} out</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="progress-section">
+      <div class="progress-label"><span class="lbl">De-kitted</span><span class="val">${totalOut} / ${totalExpected}</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${Math.round((totalOut/totalExpected)*100)}%;background:var(--warning);"></div></div>
+    </div>
+  </div>`;
+  document.getElementById('dk11-prod-label').classList.remove('disabled');
+  document.getElementById('dk11-product-box').classList.remove('disabled');
+  document.getElementById('dk11-pi').disabled = false;
+  document.getElementById('dk11-pi').focus();
+}
+
+function dk11ScanProduct() {
+  const input = document.getElementById('dk11-pi');
+  if (!input.value.trim()) return;
+  input.value = '';
+  const idx = dk11Data.products.findIndex(p => !p.confirmed);
+  if (idx === -1) return;
+  dk11Data.products[idx].scanned++;
+  document.getElementById('dk11-right-empty').style.display = 'none';
+  document.getElementById('dk11-right-content').style.display = 'block';
+  dk11RenderRight();
+  dk11RenderLeft();
+}
+
+function dk11RenderRight() {
+  const rc = document.getElementById('dk11-right-content');
+  dk11Data.allConfirmed = dk11Data.products.every(p => p.confirmed);
+
+  let infoSnackbar = '';
+  const nextIdx = dk11Data.products.findIndex(p => !p.confirmed);
+  if (nextIdx !== -1 && dk11Data.products.some(p => p.confirmed)) {
+    infoSnackbar = `<div style="padding:10px 12px;background:var(--info-bg);border:1px solid var(--info);border-radius:var(--radius-default);font-size:13px;color:var(--info);display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span class="material-icons-outlined" style="font-size:16px;">info</span>Scan <b>${dk11Data.products[nextIdx].name}</b> next</div>`;
+  }
+
+  let productCards = dk11Data.products.filter(p => p.scanned > 0).map((p, i) => {
+    return `<div class="product-details" style="margin-bottom:8px;"><div style="display:flex;align-items:flex-start;justify-content:space-between;"><div><div class="product-name">${p.name}</div><div class="product-meta">SKU: ${p.sku}</div></div><div class="input-field" style="width:180px;"><div class="input-box"><input value="${p.scanned}" style="text-align:center;font-weight:600;${p.confirmed?'background:#f9f9fb;':''}" id="dk11-qty-${i}" ${p.confirmed?'disabled':''} onkeydown="if(event.key==='Enter')dk11ConfirmQty(${i})">${p.confirmed?`<span class="material-icons-outlined" style="font-size:16px;cursor:pointer;color:var(--text-base);" onclick="dk11ResetQty(${i})">close</span>`:''}</div></div></div></div>`;
+  }).join('');
+
+  rc.innerHTML = `<div class="fade-in" style="padding:16px;">
+    <div class="scan-log-header"><span class="title">De-kit Log: ${dk11Data.comboSku}</span><button class="btn btn-primary btn-sm" ${!dk11Data.allConfirmed?'disabled':''} onclick="dk11Print()">${dk11Data.printed?'Re-print barcodes':'Print individual barcodes'}</button></div>
+    ${infoSnackbar}${productCards}
+    ${dk11Data.printed?`<div class="divider"></div><div style="margin-top:16px;"><label style="font-size:14px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:8px;">Destination container (individual items)</label><div style="display:flex;gap:8px;align-items:center;"><div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border-primary);border-radius:var(--radius-default);background:var(--bg-primary);"><span class="material-icons-outlined" style="font-size:18px;color:var(--text-base);">qr_code_scanner</span><input id="dk11-dest" placeholder="Scan destination for loose items" value="${dk11Data.destContainer}" style="border:none;outline:none;flex:1;font-size:14px;font-family:inherit;font-weight:500;background:transparent;" oninput="dk11ToggleConfirm()" onkeydown="if(event.key==='Enter')dk11ScanDest()"></div><button class="btn btn-primary" id="dk11-confirm-btn" ${!dk11Data.destContainer?'disabled':''} onclick="dk11ScanDest()">Confirm</button></div>${dk11Data.destContainer?`<div style="margin-top:8px;display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--success-bg);border:1px solid #a7d7b8;border-radius:var(--radius-default);font-size:13px;color:var(--success);"><span class="material-icons-outlined" style="font-size:16px;">check_circle</span><b>${dk11Data.destContainer}</b>&nbsp;verified</div><div style="margin-top:12px;"><button class="btn btn-primary" onclick="dk11Review()"><span class="material-icons-outlined" style="font-size:16px;">visibility</span>Review & Submit</button></div>`:''}</div>`:''}
+  </div>`;
+}
+
+function dk11ConfirmQty(i) { const inp=document.getElementById(`dk11-qty-${i}`); const v=parseInt(inp.value)||0; if(v<=0)return; dk11Data.products[i].scanned=v; dk11Data.products[i].confirmed=true; dk11RenderRight(); dk11RenderLeft(); }
+function dk11ResetQty(i) { dk11Data.products[i].confirmed=false; dk11Data.printed=false; dk11Data.destContainer=''; dk11RenderRight(); }
+function dk11Print() { dk11Data.printed=true; dk11RenderRight(); }
+function dk11ToggleConfirm() { const i=document.getElementById('dk11-dest'); const b=document.getElementById('dk11-confirm-btn'); if(i&&b)b.disabled=!i.value.trim(); }
+function dk11ScanDest() { const i=document.getElementById('dk11-dest'); const v=i.value.trim()||'DST-2024-14A3'; i.value=v; dk11Data.destContainer=v; dk11RenderRight(); }
+function dk11Review() {
+  let rows=''; dk11Data.products.forEach(p=>{rows+=`<tr><td>${p.name}</td><td>${p.sku}</td><td>${p.scanned}</td><td>${dk11Data.destContainer}</td></tr>`;});
+  document.getElementById('k11-review-body').innerHTML=rows;
+  document.getElementById('k11-modal').querySelector('.modal-footer .btn-primary').setAttribute('onclick','dk11Submit()');
+  document.getElementById('k11-modal').classList.add('vis');
+}
+function dk11Submit() { document.getElementById('k11-modal').classList.remove('vis'); document.getElementById('k11-snackbar').classList.add('vis'); document.getElementById('k11-snackbar-text').textContent=`De-kitting completed — ${dk11Data.assembledQty} combos broken → individual items → ${dk11Data.destContainer}`; setTimeout(()=>{location.reload();},2500); }
+
+// === De-Kit: 1 Container Many Combos ===
+const dk1mData = {
+  client: 'Mamaearth (Honasa Consumer Pvt Ltd)',
+  container: '',
+  combos: [
+    { name: 'Rosemary Hair Care Combo', sku: 'MSKU-ROSEMARY-2PC', qty: 4, products: [
+      { name: 'ME Rosemary Hair Fall Oil 250ML', sku: '#2928442', scanned: 0, confirmed: false },
+      { name: 'ME Rosemary Hair Fall Shampoo 250ML', sku: '#2928443', scanned: 0, confirmed: false }
+    ], printed: false, dest: '' },
+    { name: 'Vitamin C Glow Combo', sku: 'MSKU-VITC-2PC', qty: 3, products: [
+      { name: 'Mamaearth Vitamin C Sunscreen SPF50 - 80g', sku: '#2928444', scanned: 0, confirmed: false },
+      { name: 'Mamaearth Vitamin C Face Wash - 100g', sku: '#2928445', scanned: 0, confirmed: false }
+    ], printed: false, dest: '' }
+  ],
+  currentComboIdx: 0,
+  currentProductIdx: 0,
+  totalCombosCompleted: 0
+};
+
+function dk1mScanContainer() {
+  const input=document.getElementById('dk1m-ci'); const val=input.value.trim()||'CONT_8819000200010'; dk1mData.container=val; input.value=val;
+  document.getElementById('dk1m-container-box').style.borderColor='var(--success)'; document.getElementById('dk1m-container-box').style.background='#fafff9';
+  document.getElementById('dk1m-left-empty').style.display='none';
+  const lc=document.getElementById('dk1m-left-content'); lc.style.display='block';
+  lc.innerHTML='<div class="loader-container"><div class="loader"></div><div class="loader-text">Fetching container details</div></div>';
+  setTimeout(()=>{dk1mRenderLeft();},1200);
+}
+
+function dk1mRenderLeft() {
+  const lc=document.getElementById('dk1m-left-content');
+  let accHtml=dk1mData.combos.map((c,i)=>`
+    <div class="accordion"><div class="acc-header open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('hidden')">${c.name}<span class="badge badge-warning" style="margin-left:8px;">${c.qty} assembled</span><span class="arrow material-icons-outlined">keyboard_arrow_down</span></div>
+    <div class="acc-body">${c.products.map(p=>`<div class="sku-item"><div class="sku-info"><div class="sku-name">${p.name}</div><div class="sku-meta">SKU: ${p.sku}</div></div><div class="sku-qty">${p.scanned}/${c.qty}</div></div>`).join('')}</div></div>`).join('');
+  lc.innerHTML=`<div class="fade-in">
+    <div style="padding:16px;font-size:14px;font-weight:600;color:var(--text-heading);">Container attributes</div>
+    <div class="info-card"><div class="value">${dk1mData.client}</div><div class="label">Container: ${dk1mData.container} &bull; ${dk1mData.combos.length} Assembled Combos</div></div>
+    <div style="padding:8px 16px;"><div style="padding:8px 12px;background:var(--warning-bg);border-radius:var(--radius-default);font-size:13px;color:var(--warning);font-weight:500;text-align:center;"><b>De-kitting mode</b> — multiple combo types to break down</div></div>
+    ${accHtml}
+    <div class="progress-section"><div class="progress-label"><span class="lbl">Combos de-kitted</span><span class="val">${dk1mData.totalCombosCompleted} / ${dk1mData.combos.length}</span></div><div class="progress-track"><div class="progress-fill" style="width:${Math.round((dk1mData.totalCombosCompleted/dk1mData.combos.length)*100)}%;background:var(--warning);"></div></div></div>
+  </div>`;
+  document.getElementById('dk1m-prod-label').classList.remove('disabled'); document.getElementById('dk1m-product-box').classList.remove('disabled'); document.getElementById('dk1m-pi').disabled=false; document.getElementById('dk1m-pi').focus();
+}
+
+function dk1mScanProduct() {
+  const input=document.getElementById('dk1m-pi'); if(!input.value.trim())return; input.value='';
+  const combo=dk1mData.combos[dk1mData.currentComboIdx]; if(!combo)return;
+  const p=combo.products[dk1mData.currentProductIdx]; if(!p||p.confirmed)return;
+  p.scanned++;
+  document.getElementById('dk1m-right-empty').style.display='none'; document.getElementById('dk1m-right-content').style.display='block';
+  dk1mRenderRight(); dk1mRenderLeft();
+}
+
+function dk1mRenderRight() {
+  const rc=document.getElementById('dk1m-right-content');
+  const combo=dk1mData.combos[dk1mData.currentComboIdx];
+  const allConfirmed=combo.products.every(p=>p.confirmed);
+  const nextIdx=combo.products.findIndex(p=>!p.confirmed);
+  let infoSnackbar='';
+  if(nextIdx!==-1&&combo.products.some(p=>p.confirmed)){infoSnackbar=`<div style="padding:10px 12px;background:var(--info-bg);border:1px solid var(--info);border-radius:var(--radius-default);font-size:13px;color:var(--info);display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span class="material-icons-outlined" style="font-size:16px;">info</span>Scan <b>${combo.products[nextIdx].name}</b> next</div>`;}
+  let cards=combo.products.filter(p=>p.scanned>0).map((p,i)=>`<div class="product-details" style="margin-bottom:8px;"><div style="display:flex;align-items:flex-start;justify-content:space-between;"><div><div class="product-name">${p.name}</div><div class="product-meta">SKU: ${p.sku}</div></div><div class="input-field" style="width:180px;"><div class="input-box"><input value="${p.scanned}" style="text-align:center;font-weight:600;${p.confirmed?'background:#f9f9fb;':''}" id="dk1m-qty-${i}" ${p.confirmed?'disabled':''} onkeydown="if(event.key==='Enter')dk1mConfirmQty(${i})">${p.confirmed?`<span class="material-icons-outlined" style="font-size:16px;cursor:pointer;color:var(--text-base);" onclick="dk1mResetQty(${i})">close</span>`:''}</div></div></div></div>`).join('');
+  rc.innerHTML=`<div class="fade-in" style="padding:16px;">
+    <div class="scan-log-header"><span class="title">${combo.name} (De-kit)</span><button class="btn btn-primary btn-sm" ${!allConfirmed?'disabled':''} onclick="dk1mPrint()">${combo.printed?'Re-print barcodes':'Print individual barcodes'}</button></div>
+    ${infoSnackbar}${cards}
+    ${combo.printed?`<div class="divider"></div><div style="margin-top:16px;"><label style="font-size:14px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:8px;">Destination container</label><div style="display:flex;gap:8px;align-items:center;"><div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border-primary);border-radius:var(--radius-default);background:var(--bg-primary);"><span class="material-icons-outlined" style="font-size:18px;color:var(--text-base);">qr_code_scanner</span><input id="dk1m-dest" placeholder="Scan destination" value="${combo.dest}" style="border:none;outline:none;flex:1;font-size:14px;font-family:inherit;font-weight:500;background:transparent;" oninput="dk1mToggleConfirm()" onkeydown="if(event.key==='Enter')dk1mScanDest()"></div><button class="btn btn-primary" id="dk1m-confirm-btn" ${!combo.dest?'disabled':''} onclick="dk1mScanDest()">Confirm</button></div>${combo.dest?`<div style="margin-top:8px;display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--success-bg);border:1px solid #a7d7b8;border-radius:var(--radius-default);font-size:13px;color:var(--success);"><span class="material-icons-outlined" style="font-size:16px;">check_circle</span><b>${combo.dest}</b>&nbsp;verified</div>`:''}</div>`:''}
+  </div>`;
+}
+
+function dk1mConfirmQty(i){const combo=dk1mData.combos[dk1mData.currentComboIdx];const inp=document.getElementById(`dk1m-qty-${i}`);const v=parseInt(inp.value)||0;if(v<=0)return;combo.products[i].scanned=v;combo.products[i].confirmed=true;const next=combo.products.findIndex(p=>!p.confirmed);if(next!==-1)dk1mData.currentProductIdx=next;dk1mRenderRight();dk1mRenderLeft();}
+function dk1mResetQty(i){const combo=dk1mData.combos[dk1mData.currentComboIdx];combo.products[i].confirmed=false;combo.printed=false;combo.dest='';dk1mData.currentProductIdx=i;dk1mRenderRight();}
+function dk1mPrint(){dk1mData.combos[dk1mData.currentComboIdx].printed=true;dk1mRenderRight();}
+function dk1mToggleConfirm(){const i=document.getElementById('dk1m-dest');const b=document.getElementById('dk1m-confirm-btn');if(i&&b)b.disabled=!i.value.trim();}
+function dk1mScanDest(){
+  const i=document.getElementById('dk1m-dest');const v=i.value.trim()||'DST-2024-14A3';i.value=v;
+  dk1mData.combos[dk1mData.currentComboIdx].dest=v;dk1mData.totalCombosCompleted++;
+  if(dk1mData.totalCombosCompleted>=dk1mData.combos.length){dk1mRenderRight();setTimeout(()=>{dk1mReview();},500);}
+  else{dk1mData.currentComboIdx++;dk1mData.currentProductIdx=0;const rc=document.getElementById('dk1m-right-content');rc.innerHTML=`<div class="fade-in" style="padding:16px;"><div style="padding:12px;background:var(--info-bg);border:1px solid var(--info);border-radius:var(--radius-default);font-size:13px;color:var(--info);display:flex;align-items:center;gap:8px;"><span class="material-icons-outlined" style="font-size:16px;">info</span>Combo de-kitted. Scan products for <b>${dk1mData.combos[dk1mData.currentComboIdx].name}</b>.</div></div>`;dk1mRenderLeft();document.getElementById('dk1m-pi').focus();}
+}
+function dk1mReview(){
+  let rows='';dk1mData.combos.forEach(c=>{c.products.forEach(p=>{rows+=`<tr><td>${p.name}</td><td>${p.sku}</td><td>${p.scanned}</td><td>${c.dest}</td></tr>`;});});
+  document.getElementById('k11-review-body').innerHTML=rows;document.getElementById('k11-modal').querySelector('.modal-footer .btn-primary').setAttribute('onclick','dk1mSubmit()');document.getElementById('k11-modal').classList.add('vis');
+}
+function dk1mSubmit(){document.getElementById('k11-modal').classList.remove('vis');document.getElementById('k11-snackbar').classList.add('vis');document.getElementById('k11-snackbar-text').textContent=`De-kitting completed — ${dk1mData.combos.length} combos broken → individual items`;setTimeout(()=>{location.reload();},2500);}
+
+</script>
+</body>
+</html>
