@@ -89,18 +89,19 @@
     .input-field .input-box.disabled input::placeholder { color: var(--text-disabled); }
 
     /* Input Field — Small variant (TDS) */
-    /* Keep container width matching panel width below so fields stay aligned with left/right panels */
+    /* Width matches the panel below it (393px) so the input box's edges line up exactly with
+       the rectangle underneath — no more capped/auto width that fell short of the panel. */
     .input-field.small { width: 393px; max-width: 393px; }
     .input-field.small label { font-size: 12px; }
-    .input-field.small .input-box { padding: 6px 10px; gap: 4px; display: inline-flex; width: auto; max-width: 280px; }
+    .input-field.small .input-box { padding: 6px 10px; gap: 4px; display: flex; width: 100%; max-width: none; }
     .input-field.small .input-box .material-icons-outlined { font-size: 16px; }
     .input-field.small .input-box input { font-size: 13px; }
     .input-field.hidden-field { visibility: hidden; }
 
     /* Panels */
-    .panels-container { display: flex; flex: 1; overflow: hidden; }
-    .panel-left { width: 393px; min-width: 393px; background: var(--bg-coal-weakest); display: flex; flex-direction: column; overflow-y: auto; position: relative; }
-    .panel-right { flex: 1; border: 1px solid var(--border-coal); background: var(--bg-primary); display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+    .panels-container { display: flex; flex: 1; overflow: hidden; gap: 16px; }
+    .panel-left { width: 393px; min-width: 393px; background: var(--bg-coal-weakest); display: flex; flex-direction: column; overflow-y: auto; position: relative; border-radius: var(--radius-medium); }
+    .panel-right { flex: 1; border: 1px solid var(--border-coal); background: var(--bg-primary); display: flex; flex-direction: column; overflow-y: auto; position: relative; border-radius: var(--radius-medium); }
     .panel-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; height: 100%; padding: 40px; }
     .panel-empty img { width: 100px; height: auto; opacity: 0.6; }
     .panel-empty p { font-size: 14px; font-weight: 500; color: var(--text-base); text-align: center; }
